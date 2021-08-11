@@ -18,16 +18,18 @@ class ComputerPlayer < Player
   def initialize
     @name = "Hal"
     @hidden_code = [rand(1..8), rand(1..8), rand(1..8), rand(1..8)]
-    @all_possible_guesses = [1, 2, 3, 4, 5, 6, 7, 8].repeated_permutation(4).to_a
+    @remaining_guess_array = [1, 2, 3, 4, 5, 6, 7, 8].repeated_permutation(4).to_a
     @current_guess = [1, 1, 2, 2]
-    @remaining_guess_array = []
-    @all_possible_guesses.each {|guess|
-    @remaining_guess_array << guess}
   end
   def guesser(num_correct, num_in_correct_order)
-    ints_correct = 0
-    ints_in_correct_order = 0
-    @remaining_guess_array.each_with_index {|guess, index| guess.each_with_index {|num, i|
+    guess_hash = {}
+    peg_array = [num_correct, num_in_correct_order]
+    @remaining_guess_array.map {|guess|
+    guess_hash[guess] = [nil, nil]}
+    @remaining_guess_array.map {|guess|
+      ints_correct = 0
+      ints_in_correct_order = 0
+    guess.each_with_index {|num, i|
     if @current_guess.include?(num)
       ints_correct += 1
     end
@@ -35,26 +37,11 @@ class ComputerPlayer < Player
       ints_in_correct_order += 1
     end
     }
-    if ints_correct != num_correct && ints_in_correct_order != num_in_correct_order
-      @remaining_guess_array.delete_at(index)
-    end
-    }
-    @all_possible_guesses.delete(current_guess)
-
-    possible_pegs = [0, 1, 2, 3, 4].repeated_permutation(2).to_a
-    @all_possible_guesses.each_with_index { |guess, index|
-possible_pegs.each {|pair|
-  num_correct = pair[0]
-  num_in_correct_order = pair[1]
-
-}
-
-  }
-
-
-
-
-    @current_guess = @all_possible_guesses.sample
+  guess_hash[guess] = [ints_correct, ints_in_correct_order]}
+  matching_hash = guess_hash.select {|key, value|
+  guess_hash[key] == peg_array}
+  @remaining_guess_array = matching_hash.keys
+  @current_guess = @remaining_guess_array[0]
   end
 end
 
@@ -76,7 +63,6 @@ response = gets.chomp.downcase
 if response == "computer"
   hal = ComputerPlayer.new
   puts "Neat. We've generated a computer to play against, named Hal"
-  hidden_code = hal.hidden_code
   break
 elsif response == "human"
   puts "Cool! Surprised you have friends. What's their name?"
@@ -90,23 +76,37 @@ elsif response == "human"
   system "clear"
   break
 else
-  puts "You entered an invalid response, you little twat."
+  puts "You entered an invalid response."
 end
 end
 #
-# if response == "computer"
-#   puts "Would you like to have the computer guess first, or you guess first?"
+if response == "computer"
+  puts "Would you like to have the computer guess, or you guess? type 'computer' or 'me'"
+  who_guesses = gets.chomp.downcase
+end
 
-
-puts hal.hidden_code
 board = Board.new
-current_array = hal.current_guess
+
+if who_guesses == "computer"
+  puts "What would like your hidden code to be? (we won't tell Hal)"
+  hidden_code = gets.chomp.split
+  hidden_code.each_with_index {|x, i|
+  hidden_code[i] = x.to_i}
+elsif who_guesses == "me"
+  hidden_code = hal.hidden_code
+end
+
 nums_correct = 0
 nums_in_correct_order = 0
 turns = 0
+current_array = []
 while current_array != hidden_code && turns < 12
 puts "#{player_1.name}, enter a series of four numbers between 1 and 8:"
-current_array = hal.current_guess
+if who_guesses == "computer"
+  current_array = hal.current_guess
+elsif who_guesses == "me"
+  current_array = gets.chomp.split
+end
 # converts input to integer
 current_array.each_with_index {|x, i|
 current_array[i] = x.to_i}
@@ -124,13 +124,16 @@ puts board.board_array.reverse.map { |a| a.map{|i| i.to_s.rjust(2) }.join}
 turns += 1
 
 puts "You got #{nums_correct} correct, with #{nums_in_correct_order} in the correct location. You have used #{turns} out of 12 turns."
+
 if nums_correct == 4 && nums_in_correct_order == 4
   puts "You win! Congrats!"
 end
 if turns == 12
   puts "You are out of turns!"
 end
-hal.guesser(nums_correct, nums_in_correct_order)
+if who_guesses == "computer"
+  hal.guesser(nums_correct, nums_in_correct_order)
+end
 nums_correct = 0
 nums_in_correct_order = 0
 
