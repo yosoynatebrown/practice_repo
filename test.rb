@@ -1,7 +1,20 @@
-puts("What\'s your age?")
-age = gets.chomp.to_i
+require './employee'
 
-comment = age<27 ? "You've got your whole life ahead of you" : "Daaamn you old bro"
+class SalesManager < Employee
+  attr_reader :base_salary,
+              :estimated_annual_sales
+def initialize(base_salary, estimated_annual_sales, name, id)
+  @base_salary = base_salary
+  @estimated_annual_sales = estimated_annual_sales
+  super(name, id)
+end
 
+def bonus
+  0.1 * @estimated_annual_sales
+end
 
-puts(comment)
+def total_compensation
+  super + 1
+end
+
+end
