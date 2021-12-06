@@ -1,4 +1,4 @@
-fixture = "199
+@depth_fixture = "199
 200
 208
 210
@@ -12,7 +12,7 @@ fixture = "199
 
 
 
-full_input = 
+@full_depth_input = 
 "159
 158
 174
@@ -2014,18 +2014,3 @@ full_input =
 8557
 8568"
 
-def number_of_increases(depths)
-  counter = 0
-  ints = depths.split("\n").map { |num| num.to_i }
-  ints[1..-1].each_with_index do |int, i|
-    i = i + 1
-    if int > ints[i - 1]
-      counter += 1
-    end
-  end
-  counter
-end
-
-
-
-p number_of_increases(full_input)
